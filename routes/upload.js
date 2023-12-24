@@ -1,7 +1,5 @@
 const multer = require('multer');
 const Minio = require('minio');
- 
-
 
 const minioClient = new Minio.Client({
   endPoint: 'localhost',
@@ -14,9 +12,6 @@ const minioClient = new Minio.Client({
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
-
-
 app.post('/upload', upload.single('audio'), async (req, res) => {
   const file = req.file;
 
@@ -27,15 +22,15 @@ app.post('/upload', upload.single('audio'), async (req, res) => {
   const metaData = {
     'Content-Type': file.mimetype
   };
-  
-  const bucketName = req.username ;
+
+  const bucketName = req.username;
   const objectName = 'audio/' + file.originalname;
 
   const bucketExists = await minioClient.bucketExists(bucketName);
-  
-    if (!bucketExists) {
-      await minioClient.makeBucket(bucketName);
-    }
+
+  if (!bucketExists) {
+    await minioClient.makeBucket(bucketName);
+  }
 
   try {
     await minioClient.putObject(bucketName, objectName, file.buffer, metaData);
@@ -46,6 +41,3 @@ app.post('/upload', upload.single('audio'), async (req, res) => {
     return res.status(500).send('Error uploading file to MinIO');
   }
 });
-
-
- 
